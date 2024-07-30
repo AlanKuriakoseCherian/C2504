@@ -1,0 +1,25 @@
+pseudo: routine
+Function IsPalindrome(number)
+  reversedNumber = 0
+  originalNumber = number
+  While number is not 0
+    remainder = number % 10
+    reversedNumber = reversedNumber * 10 + remainder
+    number = number / 10
+  End While
+
+  If originalNumber equals reversedNumber
+    Return true
+  Else
+    Return false
+  End If
+
+pseudo: routine test
+
+Procedure TestIsPalindrome()
+  Input number
+  If IsPalindrome(number)
+    Print "Number is a palindrome"
+  Else
+    Print "Number is not a palindrome"
+  End If
