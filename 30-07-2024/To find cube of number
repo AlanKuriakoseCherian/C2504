@@ -1,0 +1,11 @@
+pseudo: routine
+ Function FindCube(num)
+   cube=nume*num*num
+   return cube
+
+   
+pseudo: routine test
+ Procedure TestFindCube()
+    input num
+    cube=FindCube(num)
+    print cube
