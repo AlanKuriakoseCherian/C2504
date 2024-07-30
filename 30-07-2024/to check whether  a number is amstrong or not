@@ -1,0 +1,31 @@
+pseudo: routine
+Function IsArmstrong(number)
+  digitCount = 0
+  temp = number
+  While temp is not 0
+    digitCount = digitCount + 1
+    temp = temp / 10
+  End While
+  
+  temp = number
+  sum = 0
+While temp is not 0
+  remainder = temp % 10;
+  sum += (int)Math.Pow(remainder, digits);
+  temp /= 10;
+  End While
+  
+  If number equals sum
+    Return true
+  Else
+    Return false
+  End If
+
+pseudo: routine test
+ Procedure Main()
+  Input number
+  If IsArmstrong(number)
+    Print "Number is an Armstrong number"
+  Else
+    Print "Number is not an Armstrong number"
+  End If
