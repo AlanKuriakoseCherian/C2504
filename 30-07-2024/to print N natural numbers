@@ -5,6 +5,6 @@ pseudo: routine
     End For
 
 pseudo: routine test
-Procedure TestPrintNumbers()
+Procedure Main()
     Input n
     Call PrintNumbers(n)
