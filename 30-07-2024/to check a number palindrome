@@ -9,9 +9,6 @@ Function IsPalindrome(number)
   End While
 
   If originalNumber equals reversedNumber
-    Return true
-  Else
-    Return false
   End If
 
 pseudo: routine test
