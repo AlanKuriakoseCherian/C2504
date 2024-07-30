@@ -1,0 +1,13 @@
+pseudo: routine
+ Function IsDivisibleby3(num)
+   if num%3==0
+     return true
+   else
+     return false
+
+Procedure TestIsDivisibleby3()
+   input num
+   if IsDivisibleby3(num)
+      print "Divisible by 3"
+   else 
+     print "not divisible by 3"
