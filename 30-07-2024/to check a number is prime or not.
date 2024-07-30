@@ -1,0 +1,29 @@
+pseudo: routine
+
+Function IsPrime(number)
+  If number is less than or equal to 1
+    Return false
+  End If
+  
+  If number is less than or equal to 3
+    Return true
+  End If
+  
+  For i = 2 to square root of number
+    If number is divisible by i
+      Return false
+    End If
+  End For
+  
+  Return true
+End Function
+
+pseuto: routine test
+
+Procedure Main()
+  Input number
+  If IsPrime(number)
+    Print "Number is prime"
+  Else
+    Print "Number is not prime"
+  End If
