@@ -291,3 +291,68 @@ static int ReadAndFindMinSalaryOfNDoctors()
         Console.WriteLine("Minimum salary among the doctors: " + minSalary);
     }
 }
+8.
+class Program
+{
+
+    static void ReadAndFindSumOfDoctorsSalariesTillZero()
+    {
+        int sum = 0;
+        int salary;
+
+        do
+        {
+            Console.WriteLine("Enter the doctor's salary (enter 0 to stop): ");
+            string input = Console.ReadLine();
+
+            // Try to parse the input and validate it
+            if (!int.TryParse(input, out salary) || salary < 0)
+            {
+                Console.WriteLine("Input a valid non-negative salary.");
+                continue;
+            }
+
+            if (salary != 0)
+            {
+                sum += salary;
+            }
+        }
+        while (salary != 0);
+
+        Console.WriteLine("Sum of all doctors' salaries: " + sum);
+    }
+ static void Main(string[] args)
+    {
+        ReadAndFindSumOfDoctorsSalariesTillZero();
+    }
+}
+
+9.class Program 
+{
+   static void ReadAndFindSumOfDoctorsSalariesTillZero()
+   {
+      int sum = 0;
+      int salary = int.Parse(Console.ReadLine());
+      while(salary != 0)
+      {
+         if(salary<0)
+         {
+           Console.WriteLine("Input valid salary");
+            salary = int.Parse(Console.ReadLine());
+           continue;
+         }
+         else
+         {
+           sum += salary;
+           salary = int.Parse(Console.ReadLine());
+
+         }
+       }
+      Console.WriteLine("Sum of all doctors' salaries: " + sum);
+    }
+ static void Main(string[] args)
+    {
+        ReadAndFindSumOfDoctorsSalariesTillZero();
+    }
+
+}
