@@ -1,0 +1,85 @@
+1. pseudo code
+function IsDoctorSalaryMin6Digits(doctorSalary) 
+    return doctorSalary >= 100000
+    
+2.function TestIsDoctorSalaryMin6Digits()
+    Input doctorSalary
+    if IsDoctorSalaryMin6Digits(doctorSalary)
+        print "Doctor gets Min 6 digits salary"
+    end if 
+3. function TestIsDoctorSalaryMin6Digits()
+    Input doctorSalary
+    if IsDoctorSalaryMin6Digits(doctorSalary)
+        print "Doctor gets Min 6 digits salary"
+    else
+        print "Doctor not geting Min 6 digits salary"
+        
+    end if 
+
+4.function CountMin6DigitsSalariedDoctors(salaries, size)
+    count = 0
+    for  i = 0 .. size-1
+        if IsDoctorSalaryMin6Digits(salaries[i])
+            count += 1
+        end if
+    end for 
+    return count 
+
+5.function TestCountMin6DigitsSalariedDoctors() 
+    Input size 
+    Input salaries <- iterate and get 
+    sixDigitsSalariedCount = CountMin6DigitsSalariedDoctors(salaries, size)
+    print sixDigitsSalariedCount
+    
+6.  function ReadAndCountDoctorsMin6DigitsSalaried(): 
+    count = 0 
+    Input N 
+    for i = 1 .. N 
+        Input salary 
+        isMin6Digits = IsDoctorSalaryMin6Digits(salary)
+        if isMin6Digits then 
+            count += 1
+        end if 
+
+7.  function ReadAndFindMinSalaryOfNDoctors():
+    MinSalary = -1
+    Input N  
+    for i = 1 .. N 
+        Input salary
+        if i == 1 then 
+             MinSalary = salary 
+             continue 
+        end if 
+
+        if salary < MinSalary then 
+            MinSalary = salary
+        end if 
+
+8.function ReadAndFindSumOfDoctorsSalariesTillZero()
+    sum = 0 
+    do 
+        input salary 
+        if !(salary > 0 || salary == 0)
+            print "Input valid salary"
+            continue 
+        end if 
+        
+        if salary != 0 
+            sum += salary
+        end if  
+    while salary != 0
+    print sum 
+
+9.function ReadAndFindSumOfDoctorsSalariesTillZero()
+    sum = 0 
+    input salary
+    while salary != 0
+        if (salary < 0) 
+            print "Input valid salary"
+            input salary
+            continue
+        end if        
+        sum += salary
+        input salary
+    end while 
+    print sum 
