@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   
+    <title>Document</title>
+    <style>
+        code{
+            background-color: #e7e7e7;
+            padding: 3px;
+            border-radius: 5px;
+            color: red;
+        }
+    </style>
+
+</head>
+<body>
+    <h1>sdadsfd</h1>
+    <hr>
+    <h2>dfgsdg</h2>
+    <p>Lorem ipsum dolor <code>sdfdsfd</code>sit amet consectetur <wbr>wadipisicing elit. Itaque nisi cumque at, rem consequatur perferendis a soluta ipsa pariatur laborum est quidem excepturi veritatis voluptate libero nesciunt eum ut numquam. </p>
+<pre>g    <p>Lorem ipsum dolor <code>sdfdsfd</code>sit amet consectetur <wbr>wadipisicing elit. Itaque nisi cumque at, rem consequatur perferendis a soluta ipsa pariatur laborum est quidem excepturi veritatis voluptate libero nesciunt eum ut numquam. </p>
+</pre>
+</body>
+</html>
