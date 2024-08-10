@@ -1,0 +1,50 @@
+Q1.Find the Oldest and Youngest Employees
+Problem: Given an `Employees` table
+with columns `EmployeeID`, `Name`, and `DateOfBirth`,
+find the oldest and youngest employees.
+  
+Ans.
+  SELECT 
+  (SELECT Name FROM Employees WHERE DateOfBirth = (SELECT MIN(DateOfBirth) FROM Employees)) AS OldestEmployee,
+  (SELECT Name FROM Employees WHERE DateOfBirth = (SELECT MAX(DateOfBirth) FROM Employees)) AS YoungestEmployee;
+Q2.Find the Total Number of Orders and Total Order Value by Customer
+Problem: Given an `Orders` table,
+find the total number of orders and
+total order value for each customer.
+  Ans.
+SELECT CustomerID, COUNT(*) AS TotalOrders, SUM(Total) AS TotalOrderValue
+FROM Orders
+GROUP BY CustomerID;
+Q3.Find Employees Who Earn More Than Their Managers
+Problem: Given an `Employees` table
+with columns `EmployeeID`, `ManagerID`, and `Salary`,
+find employees who earn more than their managers.
+ Ans.
+  SELECT e.EmployeeID, e.Name AS EmployeeName, m.Name AS ManagerName FROM Employees e
+INNER JOIN Employees m ON e.ManagerID = m.EmployeeID
+WHERE e.Salary > m.Salary;
+Q4.Find Total Sales per Month
+Problem: Given a `Sales` table
+with columns `SaleAmount` and `SaleDate`,
+find the total sales amount for each month.
+Ans.SELECT MONTH(SaleDate) AS Month,SUM(SaleAmount) AS TotalSales FROM Sales
+GROUP BY MONTH(SaleDate);
+Q5.Find the Top N Products by Sales Volume
+Problem: Given a `Sales` table
+with columns `ProductID`, `SaleAmount`, and `SaleDate`,
+find the top 5 products by total sales volume.
+
+Table Structure:
+```
+CREATE TABLE Sales (
+ProductID INT,
+SaleAmount DECIMAL(10, 2),
+SaleDate DATE
+);
+
+Ans.
+WITH ProductSales AS (
+SELECT ProductID, SUM(SaleAmount) AS TotalSales FROM Sales GROUP BY ProductID )
+SELECT ProductID, TotalSales FROM ProductSales
+ORDER BY TotalSales DESC
+LIMIT 5;
