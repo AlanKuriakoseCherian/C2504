@@ -27,8 +27,9 @@ Q4.Find Total Sales per Month
 Problem: Given a `Sales` table
 with columns `SaleAmount` and `SaleDate`,
 find the total sales amount for each month.
-Ans.SELECT MONTH(SaleDate) AS Month,SUM(SaleAmount) AS TotalSales FROM Sales
-GROUP BY MONTH(SaleDate);
+Ans.SELECT MONTH(SaleDate) AS Month,YEAR(SaleDate) AS Year, SUM(SaleAmount) AS TotalSales FROM Sales
+GROUP BY MONTH(SaleDate), YEAR(SaleDate);
+
 Q5.Find the Top N Products by Sales Volume
 Problem: Given a `Sales` table
 with columns `ProductID`, `SaleAmount`, and `SaleDate`,
