@@ -44,7 +44,8 @@ SaleDate DATE
 
 Ans.
 WITH ProductSales AS (
-SELECT ProductID, SUM(SaleAmount) AS TotalSales FROM Sales GROUP BY ProductID )
+SELECT ProductID, SUM(SaleAmount) AS TotalSales FROM Sales 
+GROUP BY ProductID )
 SELECT ProductID, TotalSales FROM ProductSales
 ORDER BY TotalSales DESC
 LIMIT 5;
