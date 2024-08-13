@@ -1,0 +1,89 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ProgrammingFundamentalsProject
+{
+    class Account
+    {
+        public string number;
+        private float balance;
+        public float Balance
+        {
+            private set { 
+                if (value < 0 )
+                {
+                    Console.WriteLine("Negative Balance is not allowed");
+                    return;
+                }
+                if (value > 5000000)
+                {
+                    Console.WriteLine(" Balance should not exceed Fifty Lakh");
+                    return;
+                }
+                balance = value; }
+            get { return balance; }
+        }
+        public Account(string _number)
+        {
+            number = _number;
+            Balance = 0;
+        }
+        public void deposit(float amount)
+        {
+            if(amount <= 0)
+            {
+                Console.WriteLine("Invalid Deposit");
+                return;
+            }
+            
+            Balance += amount;
+        }
+        public void withdraw(float amount)
+        {
+            if (amount <= 0)
+            {
+                Console.WriteLine("Are you Kidding!!!");
+                return;
+            }
+
+            if ((Balance - amount)   < 0)
+            {
+                Console.WriteLine("Insufficient Balance");
+                return;
+            }
+            Balance -= amount;
+        }
+
+
+    }
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            Account sahleAc = new Account("10012002300034");
+            sahleAc.deposit(500000);
+            sahleAc.deposit(70000);
+            sahleAc.withdraw(29999);
+
+            Console.WriteLine($"Sahle account balance is {sahleAc.Balance}");
+            sahleAc.withdraw(500000);
+            Console.WriteLine($"Sahle account balance is {sahleAc.Balance}");
+            sahleAc.deposit(-12500000);
+            Console.WriteLine($"Sahle account balance is {sahleAc.Balance}");
+            sahleAc.withdraw(-1229999);
+            Console.WriteLine($"Sahle account balance is {sahleAc.Balance}");
+               sahleAc.deposit(2500000);
+            Console.WriteLine($"Sahle account balance is {sahleAc.Balance}");
+            sahleAc.deposit(2000000);
+            Console.WriteLine($"Sahle account balance is {sahleAc.Balance}");
+            sahleAc.deposit(500000);
+            Console.WriteLine($"Sahle account balance is {sahleAc.Balance}");
+
+            Console.ReadKey();
+        
+        }
+    }
+}
