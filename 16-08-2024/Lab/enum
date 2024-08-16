@@ -1,0 +1,39 @@
+using System;
+
+class Program
+{
+    enum Convertions
+    {
+        Upper,
+        Lower,
+        Trim
+    }
+  
+    static void Main Convert(string text, Convertions action)
+    {
+        if (action == Convertions.Upper)
+            Console.WriteLine(text.ToUpper());
+        else if (action == Convertions.Lower)
+            Console.WriteLine(text.ToLower());
+        else if (action == Convertions.Trim) ;
+        switch (action)
+        {
+            case Convertions.Upper:
+                Console.WriteLine(text.ToUpper());
+                break;
+            case Convertions.Lower:
+                Console.WriteLine(text.ToLower());
+                break;
+            case Convertions.Trim:
+                Console.WriteLine(text.Trim());
+                break;
+            default:
+                break;
+        }
+        }
+   static void Main()
+    {
+        Convert("Hello World", Convertions.Upper);
+    }
+
+}
