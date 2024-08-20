@@ -38,3 +38,8 @@ namespace ConsoleApp9
         }
     }
 }
+Output:
+
+Static Constr
+instance parameterless Constr
+numberOfUsers=10 eachUserNumberOfVisits=20
