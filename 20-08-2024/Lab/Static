@@ -1,0 +1,29 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ConsoleApp10
+{
+    class Clock
+    {
+        public static DateTime InitializedAt { get; set; }
+
+        static Clock()
+        {
+            InitializedAt = DateTime.Now;
+            Console.WriteLine("Time set from the constructor");
+        }
+        internal class Program
+        {
+            static void Main(string[] args)
+            {
+                Console.WriteLine(Clock.InitializedAt);
+            }
+        }
+    }
+}
+Output 
+Time set from the constructor
+8/20/2024 5:03:39 PM
