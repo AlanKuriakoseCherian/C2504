@@ -42,3 +42,7 @@ public static class MathUtilities
     }
 }
 }
+Output:
+3.14159
+25
+1
