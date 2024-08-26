@@ -1,0 +1,110 @@
+Problem Statement: Patient Vital Signs Tracker
+- Define a class: `VitalSigns` with the following properties:
+- `PatientID` (integer)
+- `HeartRate` (integer, beats per minute)
+- `BloodPressure` (string, systolic/diastolic)
+- `Temperature` (double, in Celsius)
+- Tasks:
+1. Data Collection:
+- Read N `vitalSigns` from the keyboard.
+2. Find Patient with Lowest Heart Rate:
+- Display the patient with the lowest heart rate.
+Solve in time complexity of O(N).
+Dont use built-in C# sorting or LINQ.
+3. Find Second Highest Temperature:
+- Display the patient with the second highest temperature.
+Solve in time complexity of O(N).
+Dont use built-in C# sorting or LINQ.
+4. Sort by Blood Pressure (systolic):
+- Implement and call your own sorting algorithm based on the systolic value of blood pressure.
+Dont use built-in C# sorting or LINQ.
+
+using System;
+
+class VitalSigns
+{
+    public int PatientID { get; set; }
+    public int HeartRate { get; set; }
+    public string BloodPressure { get; set; }
+    public double Temperature { get; set; }
+}
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        Console.Write("Enter the number of patients: ");
+        int N = int.Parse(Console.ReadLine());
+
+        VitalSigns[] vitalSigns = new VitalSigns[N];
+
+        // Entering Patient Details
+
+        for (int i = 0; i < N; i++)
+        {
+            Console.WriteLine("Enter details for patient " + (i + 1) + ":");
+            vitalSigns[i] = new VitalSigns();
+            vitalSigns[i].PatientID = i + 1;
+            Console.Write("Heart Rate: ");
+            vitalSigns[i].HeartRate = int.Parse(Console.ReadLine());
+            Console.Write("Blood Pressure (systolic/diastolic): ");
+            vitalSigns[i].BloodPressure = Console.ReadLine();
+            Console.Write("Temperature (Celsius): ");
+            vitalSigns[i].Temperature = double.Parse(Console.ReadLine());
+        }
+
+        // Finding Patients with Lowest Heart Rate
+
+        int lowestHeartRateIndex = 0;
+        for (int i = 1; i < N; i++)
+        {
+            if (vitalSigns[i].HeartRate < vitalSigns[lowestHeartRateIndex].HeartRate)
+            {
+                lowestHeartRateIndex = i;
+            }
+        }
+        Console.WriteLine($"Patient with the lowest heart rate: Patient ID { vitalSigns[lowestHeartRateIndex].PatientID} , HeartRate : {vitalSigns[lowestHeartRateIndex].PatientID}");
+
+        // Finding Second Highest Temperature
+
+        int highestTempIndex = 0;
+        int secondHighestTempIndex = 0;
+        for (int i = 1; i < N; i++)
+        {
+            if (vitalSigns[i].Temperature > vitalSigns[highestTempIndex].Temperature)
+            {
+                secondHighestTempIndex = highestTempIndex;
+                highestTempIndex = i;
+            }
+            else if (vitalSigns[i].Temperature > vitalSigns[secondHighestTempIndex].Temperature && i != highestTempIndex)
+            {
+                secondHighestTempIndex = i;
+            }
+        }
+        Console.WriteLine($"Patient with the second highest temperature: Patient ID  { vitalSigns[secondHighestTempIndex].PatientID} , Temperature : { vitalSigns[secondHighestTempIndex].Temperature}");
+
+        // Sorting by Blood Pressure (systolic) using Insertion Sort
+
+        for (int i = 1; i < N; i++)
+        {
+            int key = int.Parse(vitalSigns[i].BloodPressure.Split('/')[0]);
+            int j = i - 1;
+            while (j >= 0 && int.Parse(vitalSigns[j].BloodPressure.Split('/')[0]) > key)
+            {
+                VitalSigns temp = vitalSigns[j];
+                vitalSigns[j] = vitalSigns[j + 1];
+                vitalSigns[j + 1] = temp;
+                j--;
+            }
+            vitalSigns[j + 1].PatientID = i + 1; // Updating PatientID after sorting
+        }
+
+        // Displaying sorted patients by systolic blood pressure
+
+        Console.WriteLine("Sorted patients by systolic blood pressure:");
+        for (int i = 0; i < N; i++)
+        {
+            Console.WriteLine("Patient ID " + vitalSigns[i].PatientID + ": " + vitalSigns[i].BloodPressure);
+        }
+    }
+}
