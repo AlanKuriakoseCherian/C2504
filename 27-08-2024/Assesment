@@ -1,0 +1,185 @@
+using System;
+using System.Data.SqlClient;
+using log4net;
+
+namespace VitalSignsApp
+{
+    public class ServerException : Exception
+    {
+        public ServerException(string message) : base(message) { }
+         public ServerException(string message, Exception innerException) : base(message, innerException) { }
+    }
+
+    public class VitalSigns
+    {
+        public int PatientID { get; set; }
+        public int HeartRate { get; set; }
+        public string BloodPressure { get; set; }
+        public double Temperature { get; set; }
+
+        public override string ToString()
+        {
+            return $"PatientID: {PatientID}, HeartRate: {HeartRate}, BloodPressure: {BloodPressure}, Temperature: {Temperature}°C";
+        }
+    }
+
+    public class VitalSignsService 
+    {
+        private static string connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=VitalSignsDb;Integrated Security=True;";
+
+       // private static readonly string connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=VitalSignsDb;Integrated Security=True;";
+        private static readonly ILog log = LogManager.GetLogger(typeof(VitalSignsService));
+
+        public static void Read(VitalSigns[] vitalSigns)
+        {
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    string query = "SELECT PatientID, HeartRate, BloodPressure, Temperature FROM VitalSigns";
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        conn.Open();
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            for (int i = 0; i < vitalSigns.Length; i++)
+                            {
+                                if (!reader.Read())
+                                {
+                                    throw new ServerException("[0101] Not enough data in the database.");
+                                }
+
+                                vitalSigns[i] = new VitalSigns
+                                {
+                                    PatientID = (int)reader["PatientID"],
+                                    HeartRate = (int)reader["HeartRate"],
+                                    BloodPressure = reader["BloodPressure"].ToString(),
+                                    Temperature = (double)reader["Temperature"]
+                                };
+                            }
+                        }
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                log.Error($"[0102] SQL Error: {ex.Message}", ex);
+                throw new ServerException($"[0102] SQL Error: {ex.Message}", ex);
+            }
+            catch (Exception ex)
+            {
+                log.Error($"[0103] General Error: {ex.Message}", ex);
+                throw new ServerException($"[0103] General Error: {ex.Message}", ex);
+            }
+        }
+
+        public static void SortBySystolicBloodPressure(VitalSigns[] vitalSigns)
+        {
+            Array.Sort(vitalSigns, (a, b) =>
+            {
+                int aSystolic = int.Parse(a.BloodPressure.Split('/')[0]);
+                int bSystolic = int.Parse(b.BloodPressure.Split('/')[0]);
+                return aSystolic.CompareTo(bSystolic);
+            });
+        }
+
+        public static int FindLowestHeartRateIndex(VitalSigns[] vitalSigns)
+        {
+            int lowestIndex = 0;
+            for (int i = 1; i < vitalSigns.Length; i++)
+            {
+                if (vitalSigns[i].HeartRate < vitalSigns[lowestIndex].HeartRate)
+                {
+                    lowestIndex = i;
+                }
+            }
+            return lowestIndex;
+        }
+
+        public static int FindSecondHighestTemperatureIndex(VitalSigns[] vitalSigns)
+        {
+            if (vitalSigns.Length < 2)
+            {
+                throw new InvalidOperationException("Need at least two patients to find the second highest temperature.");
+            }
+
+            int highestIndex = 0;
+            int secondHighestIndex = -1;
+
+            for (int i = 1; i < vitalSigns.Length; i++)
+            {
+                if (vitalSigns[i].Temperature > vitalSigns[highestIndex].Temperature)
+                {
+                    secondHighestIndex = highestIndex;
+                    highestIndex = i;
+                }
+                else if (vitalSigns[i].Temperature > (secondHighestIndex == -1 ? double.MinValue : vitalSigns[secondHighestIndex].Temperature))
+                {
+                    secondHighestIndex = i;
+                }
+            }
+
+            if (secondHighestIndex == -1)
+            {
+                throw new InvalidOperationException("Unable to find the second highest temperature.");
+            }
+
+            return secondHighestIndex;
+        }
+    }
+
+    public class Program
+    {
+        private static readonly ILog log = LogManager.GetLogger(typeof(Program));
+
+        static void Main(string[] args)
+        {
+            int numPatients;
+
+           Console.Write("Enter the number of patients: ");
+            while (!int.TryParse(Console.ReadLine(), out numPatients) || numPatients <= 0)
+            {
+                Console.Write("Please enter a valid positive number for patients: ");
+            }
+
+            VitalSigns[] vitalSigns = new VitalSigns[numPatients];
+
+            try
+            {
+                VitalSignsService.Read(vitalSigns);
+                int lowestHeartRateIndex = VitalSignsService.FindLowestHeartRateIndex(vitalSigns);
+                log.Info($"Patient with the lowest heart rate: {vitalSigns[lowestHeartRateIndex]}");
+
+                int secondHighestTempIndex = VitalSignsService.FindSecondHighestTemperatureIndex(vitalSigns);
+                log.Info($"Patient with the second highest temperature: {vitalSigns[secondHighestTempIndex]}");
+
+                VitalSignsService.SortBySystolicBloodPressure(vitalSigns);
+
+                log.Info("Patients sorted by systolic blood pressure:");
+                foreach (VitalSigns patient in vitalSigns)
+                {
+                    log.Info(patient.ToString());
+                }
+            }
+            catch (ServerException ex)
+            {
+                log.Error($"Error: {ex.Message}", ex);
+            }
+            catch (Exception ex)
+            {
+                log.Error($"Unexpected error: {ex.Message}", ex);
+            }
+        }
+    }
+}
+Output :
+Enter the number of patients: 5
+2024-08-27 12:53:06,430 [1] INFO  VitalSignsApp.Program - Patient with the lowest heart rate: PatientID: 3, HeartRate: 65, BloodPressure: 110/70, Temperature: 36.8°C
+2024-08-27 12:53:06,456 [1] INFO  VitalSignsApp.Program - Patient with the second highest temperature: PatientID: 2, HeartRate: 85, BloodPressure: 130/85, Temperature: 37.2°C
+2024-08-27 12:53:06,457 [1] INFO  VitalSignsApp.Program - Patients sorted by systolic blood pressure:
+2024-08-27 12:53:06,457 [1] INFO  VitalSignsApp.Program - PatientID: 3, HeartRate: 65, BloodPressure: 110/70, Temperature: 36.8°C
+2024-08-27 12:53:06,457 [1] INFO  VitalSignsApp.Program - PatientID: 1, HeartRate: 72, BloodPressure: 120/80, Temperature: 36.6°C
+2024-08-27 12:53:06,459 [1] INFO  VitalSignsApp.Program - PatientID: 5, HeartRate: 78, BloodPressure: 125/85, Temperature: 37°C
+2024-08-27 12:53:06,459 [1] INFO  VitalSignsApp.Program - PatientID: 2, HeartRate: 85, BloodPressure: 130/85, Temperature: 37.2°C
+2024-08-27 12:53:06,459 [1] INFO  VitalSignsApp.Program - PatientID: 4, HeartRate: 90, BloodPressure: 140/90, Temperature: 38°C
+Press any key to continue . . .
