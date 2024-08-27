@@ -27,84 +27,116 @@ class VitalSigns
     public int HeartRate { get; set; }
     public string BloodPressure { get; set; }
     public double Temperature { get; set; }
+
+    public override string ToString()
+    {
+        return $"PatientID: {PatientID}, HeartRate: {HeartRate}, BloodPressure: {BloodPressure}, Temperature: {Temperature}°C";
+    }
 }
 
 class Program
 {
     static void Main(string[] args)
     {
+        // Ask for the number of patients
         Console.Write("Enter the number of patients: ");
-        int N = int.Parse(Console.ReadLine());
+        int numPatients = int.Parse(Console.ReadLine());
 
-        VitalSigns[] vitalSigns = new VitalSigns[N];
+        // Create an array to store the patient data
+        VitalSigns[] vitalSigns = new VitalSigns[numPatients];
 
-        // Entering Patient Details
+        // Collect patient data
+        CollectPatientData(vitalSigns, numPatients);
 
-        for (int i = 0; i < N; i++)
+        // Find and display patient with lowest heart rate
+        int lowestHeartRateIndex = FindLowestHeartRateIndex(vitalSigns);
+        Console.WriteLine($"Patient with the lowest heart rate: {vitalSigns[lowestHeartRateIndex]}");
+
+        // Find and display patient with second highest temperature
+        int secondHighestTempIndex = FindSecondHighestTemperatureIndex(vitalSigns);
+        Console.WriteLine($"Patient with the second highest temperature: {vitalSigns[secondHighestTempIndex]}");
+
+        // Sort patients by systolic blood pressure
+        SortBySystolicBloodPressure(vitalSigns);
+
+        // Display sorted patients
+        Console.WriteLine("Patients sorted by systolic blood pressure:");
+        foreach (VitalSigns patient in vitalSigns)
         {
-            Console.WriteLine("Enter details for patient " + (i + 1) + ":");
-            vitalSigns[i] = new VitalSigns();
-            vitalSigns[i].PatientID = i + 1;
+            Console.WriteLine(patient);
+        }
+    }
+
+    static void CollectPatientData(VitalSigns[] vitalSigns, int numPatients)
+    {
+        for (int i = 0; i < numPatients; i++)
+        {
+            vitalSigns[i] = new VitalSigns(); // Create a new VitalSigns object for each patient
+            Console.WriteLine($"Enter details for Patient {i + 1}:");
+
             Console.Write("Heart Rate: ");
             vitalSigns[i].HeartRate = int.Parse(Console.ReadLine());
+
             Console.Write("Blood Pressure (systolic/diastolic): ");
             vitalSigns[i].BloodPressure = Console.ReadLine();
+
             Console.Write("Temperature (Celsius): ");
             vitalSigns[i].Temperature = double.Parse(Console.ReadLine());
         }
+    }
 
-        // Finding Patients with Lowest Heart Rate
-
-        int lowestHeartRateIndex = 0;
-        for (int i = 1; i < N; i++)
+    static int FindLowestHeartRateIndex(VitalSigns[] vitalSigns)
+    {
+        int lowestIndex = 0;
+        for (int i = 1; i < vitalSigns.Length; i++)
         {
-            if (vitalSigns[i].HeartRate < vitalSigns[lowestHeartRateIndex].HeartRate)
+            if (vitalSigns[i].HeartRate < vitalSigns[lowestIndex].HeartRate)
             {
-                lowestHeartRateIndex = i;
+                lowestIndex = i;
             }
         }
-        Console.WriteLine($"Patient with the lowest heart rate: Patient ID { vitalSigns[lowestHeartRateIndex].PatientID} , HeartRate : {vitalSigns[lowestHeartRateIndex].PatientID}");
+        return lowestIndex;
+    }
 
-        // Finding Second Highest Temperature
-
-        int highestTempIndex = 0;
-        int secondHighestTempIndex = 0;
-        for (int i = 1; i < N; i++)
+    static int FindSecondHighestTemperatureIndex(VitalSigns[] vitalSigns)
+    {
+        if (vitalSigns.Length < 2)
         {
-            if (vitalSigns[i].Temperature > vitalSigns[highestTempIndex].Temperature)
+            throw new InvalidOperationException("Need at least two patients to find the second highest temperature.");
+        }
+
+        int highestIndex = 0;
+        int secondHighestIndex = 0;
+
+        for (int i = 1; i < vitalSigns.Length; i++)
+        {
+            if (vitalSigns[i].Temperature > vitalSigns[highestIndex].Temperature)
             {
-                secondHighestTempIndex = highestTempIndex;
-                highestTempIndex = i;
+                secondHighestIndex = highestIndex;
+                highestIndex = i;
             }
-            else if (vitalSigns[i].Temperature > vitalSigns[secondHighestTempIndex].Temperature && i != highestTempIndex)
+            else if (vitalSigns[i].Temperature > vitalSigns[secondHighestIndex].Temperature && i != highestIndex)
             {
-                secondHighestTempIndex = i;
+                secondHighestIndex = i;
             }
         }
-        Console.WriteLine($"Patient with the second highest temperature: Patient ID  { vitalSigns[secondHighestTempIndex].PatientID} , Temperature : { vitalSigns[secondHighestTempIndex].Temperature}");
+        return secondHighestIndex;
+    }
 
-        // Sorting by Blood Pressure (systolic) using Insertion Sort
-
-        for (int i = 1; i < N; i++)
+    static void SortBySystolicBloodPressure(VitalSigns[] vitalSigns)
+    {
+        for (int i = 1; i < vitalSigns.Length; i++)
         {
-            int key = int.Parse(vitalSigns[i].BloodPressure.Split('/')[0]);
+            VitalSigns key = vitalSigns[i];
+            int keySystolic = int.Parse(key.BloodPressure.Split('/')[0]);
             int j = i - 1;
-            while (j >= 0 && int.Parse(vitalSigns[j].BloodPressure.Split('/')[0]) > key)
+
+            while (j >= 0 && int.Parse(vitalSigns[j].BloodPressure.Split('/')[0]) > keySystolic)
             {
-                VitalSigns temp = vitalSigns[j];
-                vitalSigns[j] = vitalSigns[j + 1];
-                vitalSigns[j + 1] = temp;
+                vitalSigns[j + 1] = vitalSigns[j];
                 j--;
             }
-            vitalSigns[j + 1].PatientID = i + 1; // Updating PatientID after sorting
-        }
-
-        // Displaying sorted patients by systolic blood pressure
-
-        Console.WriteLine("Sorted patients by systolic blood pressure:");
-        for (int i = 0; i < N; i++)
-        {
-            Console.WriteLine("Patient ID " + vitalSigns[i].PatientID + ": " + vitalSigns[i].BloodPressure);
+            vitalSigns[j + 1] = key;
         }
     }
 }
