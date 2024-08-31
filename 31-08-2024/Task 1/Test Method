@@ -1,0 +1,103 @@
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using VitalSignsApp;
+
+namespace VitalSignsApp.Tests
+{
+    [TestClass()]
+    public class VitalSignsServiceTests
+    {
+        [TestMethod()]
+        public void ReadTest()
+        {
+            // Arrange
+            VitalSigns[] vitalSigns = new VitalSigns[5];
+
+            // Act
+            try
+            {
+                VitalSignsService.Read(vitalSigns);
+            }
+            catch (Exception ex)
+            {
+                Assert.Fail($"Read method threw an exception: {ex.Message}");
+            }
+
+            // Assert
+            Assert.AreEqual(5, vitalSigns.Length, "The array length should match the number of patients read.");
+            Assert.IsTrue(vitalSigns[0].PatientID > 0, "PatientID should be greater than 0.");
+            Assert.IsNotNull(vitalSigns[0].BloodPressure, "BloodPressure should not be null.");
+        }
+
+        [TestMethod()]
+        public void SortBySystolicBloodPressureTest()
+        {
+            // Arrange
+            VitalSigns[] vitalSigns = new VitalSigns[]
+            {
+        new VitalSigns { PatientID = 1, HeartRate = 72, BloodPressure = "120/80", Temperature = 36.6 },
+        new VitalSigns { PatientID = 2, HeartRate = 85, BloodPressure = "130/80", Temperature = 37.2 },
+        new VitalSigns { PatientID = 3, HeartRate = 65, BloodPressure = "110/80", Temperature = 36.8 },
+        new VitalSigns { PatientID = 4, HeartRate = 90, BloodPressure = "140/80", Temperature = 38.0 },
+        new VitalSigns { PatientID = 5, HeartRate = 78, BloodPressure = "125/80", Temperature = 37.0 }
+            };
+
+            // Act
+            VitalSignsService.SortBySystolicBloodPressure(vitalSigns);
+
+            // Assert
+            Assert.AreEqual(3, vitalSigns[0].PatientID, "The patient with the lowest systolic blood pressure should be first.");
+            Assert.AreEqual(4, vitalSigns[4].PatientID, "The patient with the highest systolic blood pressure should be last.");
+
+            // Additional check to ensure correct sorting
+            for (int i = 0; i < vitalSigns.Length - 1; i++)
+            {
+                int currentSystolic = int.Parse(vitalSigns[i].BloodPressure.Split('/')[0]);
+                int nextSystolic = int.Parse(vitalSigns[i + 1].BloodPressure.Split('/')[0]);
+                Assert.IsTrue(currentSystolic <= nextSystolic, "Array is not sorted correctly by systolic blood pressure.");
+            }
+        }
+
+        [TestMethod()]
+        public void FindLowestHeartRateIndexTest()
+        {
+            // Arrange
+            VitalSigns[] vitalSigns = new VitalSigns[]
+            {
+                new VitalSigns { PatientID = 1, HeartRate = 72, BloodPressure = "120/80", Temperature = 36.6 },
+                new VitalSigns { PatientID = 2, HeartRate = 85, BloodPressure = "130/85", Temperature = 37.2 },
+                new VitalSigns { PatientID = 3, HeartRate = 65, BloodPressure = "110/70", Temperature = 36.8 },
+                new VitalSigns { PatientID = 4, HeartRate = 90, BloodPressure = "140/90", Temperature = 38.0 },
+                new VitalSigns { PatientID = 5, HeartRate = 78, BloodPressure = "125/85", Temperature = 37.0 }
+            };
+
+            // Act
+            int lowestHeartRateIndex = VitalSignsService.FindLowestHeartRateIndex(vitalSigns);
+
+            // Assert
+            Assert.AreEqual(2, lowestHeartRateIndex, "The index of the patient with the lowest heart rate is incorrect.");
+        }
+
+        [TestMethod()]
+        public void FindSecondHighestTemperatureIndexTest()
+        {
+            VitalSigns[] vitalSigns = new VitalSigns[]
+             {
+                new VitalSigns { PatientID = 1, HeartRate = 72, BloodPressure = "120/80", Temperature = 36.6 },
+                new VitalSigns { PatientID = 2, HeartRate = 85, BloodPressure = "130/85", Temperature = 37.2 },
+                new VitalSigns { PatientID = 3, HeartRate = 65, BloodPressure = "110/70", Temperature = 36.8 },
+                new VitalSigns { PatientID = 4, HeartRate = 90, BloodPressure = "140/90", Temperature = 38.0 },
+                new VitalSigns { PatientID = 5, HeartRate = 78, BloodPressure = "125/85", Temperature = 37.0 }
+             };
+
+            // Act
+            int resultIndex = VitalSignsService.FindSecondHighestTemperatureIndex(vitalSigns);
+
+            // Assert
+            // The second highest temperature is 37.0, which is at index 4
+            Assert.AreEqual(1, resultIndex, "The index of the patient with the second highest temperature is incorrect.");
+        }
+    }
+    }
+
+
