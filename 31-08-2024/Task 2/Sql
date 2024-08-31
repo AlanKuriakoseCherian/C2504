@@ -1,0 +1,22 @@
+-- Check current schema
+SELECT COLUMN_NAME, IS_NULLABLE, COLUMN_DEFAULT
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_NAME = 'VitalSigns';
+
+Select * From VitalSigns;
+IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='VitalSigns' AND xtype='U')
+BEGIN
+    CREATE TABLE VitalSigns
+    (
+        PatientID INT IDENTITY(1,1) PRIMARY KEY,  -- Auto-generated ID
+        HeartRate INT NOT NULL,                    -- Heart Rate
+        BloodPressure NVARCHAR(50) NOT NULL,       -- Blood Pressure
+        Temperature FLOAT NOT NULL                 -- Temperature
+    );
+END
+-- Check table schema
+EXEC sp_columns 'VitalSigns';
+
+SELECT COLUMN_NAME, IS_NULLABLE, COLUMN_DEFAULT
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_NAME = 'VitalSigns';
