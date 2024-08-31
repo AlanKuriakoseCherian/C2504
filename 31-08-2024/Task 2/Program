@@ -1,0 +1,169 @@
+using System;
+using log4net;
+using SecondTask;
+
+namespace VitalSignsApp
+{
+    public class Program
+    {
+        private static readonly ILog log = LogManager.GetLogger(typeof(Program));
+
+        static void Main(string[] args)
+        {
+            bool running = true;
+            while (running)
+            {
+                Console.WriteLine("\nVital Signs Management System");
+                Console.WriteLine("1. Create Vital Sign");
+                Console.WriteLine("2. Read Vital Signs");
+                Console.WriteLine("3. Update Vital Sign");
+                Console.WriteLine("4. Delete Vital Sign");
+                Console.WriteLine("5. Exit");
+
+                Console.Write("Choose an option: ");
+                string choice = Console.ReadLine();
+
+                switch (choice)
+                {
+                    case "1":
+                        CreateVitalSign();
+                        break;
+                    case "2":
+                        ReadVitalSigns();
+                        break;
+                    case "3":
+                        UpdateVitalSign();
+                        break;
+                    case "4":
+                        DeleteVitalSign();
+                        break;
+                    case "5":
+                        running = false;
+                        Console.WriteLine("Exiting...");
+                        break;
+                    default:
+                        Console.WriteLine("Invalid choice. Please try again.");
+                        break;
+                }
+            }
+        }
+
+        private static void CreateVitalSign()
+        {
+            Console.Write("Enter Heart Rate: ");
+            int heartRate = int.Parse(Console.ReadLine());
+            Console.Write("Enter Blood Pressure (e.g., 120/80): ");
+            string bloodPressure = Console.ReadLine();
+            Console.Write("Enter Temperature: ");
+            double temperature = double.Parse(Console.ReadLine());
+
+            VitalSigns vitalSign = new VitalSigns
+            {
+                HeartRate = heartRate,
+                BloodPressure = bloodPressure,
+                Temperature = temperature
+            };
+
+            try
+            {
+                VitalSignsService.Create(vitalSign);
+                Console.WriteLine("Vital sign created successfully.");
+            }
+            catch (ServerException ex)
+            {
+                log.Error($"Error creating vital sign: {ex.Message}", ex);
+                Console.WriteLine("Error creating vital sign. Check logs for details.");
+            }
+        }
+
+        private static void ReadVitalSigns()
+        {
+            Console.Write("Enter the number of patients to read: ");
+            int numPatients;
+            while (!int.TryParse(Console.ReadLine(), out numPatients) || numPatients <= 0)
+            {
+                Console.Write("Please enter a valid positive number for patients: ");
+            }
+
+            VitalSigns[] vitalSigns = new VitalSigns[numPatients];
+
+            try
+            {
+                VitalSignsService.Read(vitalSigns);
+
+                int lowestHeartRateIndex = VitalSignsService.FindLowestHeartRateIndex(vitalSigns);
+                log.Info($"Patient with the lowest heart rate: {vitalSigns[lowestHeartRateIndex]}");
+
+                int secondHighestTempIndex = VitalSignsService.FindSecondHighestTemperatureIndex(vitalSigns);
+                log.Info($"Patient with the second highest temperature: {vitalSigns[secondHighestTempIndex]}");
+
+                VitalSignsService.SortBySystolicBloodPressure(vitalSigns);
+
+                log.Info("Patients sorted by systolic blood pressure:");
+                foreach (VitalSigns patient in vitalSigns)
+                {
+                    log.Info(patient.ToString());
+                }
+            }
+            catch (ServerException ex)
+            {
+                log.Error($"Error reading vital signs: {ex.Message}", ex);
+                Console.WriteLine("Error reading vital signs. Check logs for details.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                log.Error($"Error: {ex.Message}", ex);
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        private static void UpdateVitalSign()
+        {
+            Console.Write("Enter Patient ID to update: ");
+            int patientID = int.Parse(Console.ReadLine());
+
+            Console.Write("Enter new Heart Rate: ");
+            int heartRate = int.Parse(Console.ReadLine());
+            Console.Write("Enter new Blood Pressure (e.g., 120/80): ");
+            string bloodPressure = Console.ReadLine();
+            Console.Write("Enter new Temperature: ");
+            double temperature = double.Parse(Console.ReadLine());
+
+            VitalSigns vitalSign = new VitalSigns
+            {
+                PatientID = patientID,
+                HeartRate = heartRate,
+                BloodPressure = bloodPressure,
+                Temperature = temperature
+            };
+
+            try
+            {
+                VitalSignsService.Update(vitalSign);
+                Console.WriteLine("Vital sign updated successfully.");
+            }
+            catch (ServerException ex)
+            {
+                log.Error($"Error updating vital sign: {ex.Message}", ex);
+                Console.WriteLine("Error updating vital sign. Check logs for details.");
+            }
+        }
+
+        private static void DeleteVitalSign()
+        {
+            Console.Write("Enter Patient ID to delete: ");
+            int patientID = int.Parse(Console.ReadLine());
+
+            try
+            {
+                VitalSignsService.Delete(patientID);
+                Console.WriteLine("Vital sign deleted successfully.");
+            }
+            catch (ServerException ex)
+            {
+                log.Error($"Error deleting vital sign: {ex.Message}", ex);
+                Console.WriteLine("Error deleting vital sign. Check logs for details.");
+            }
+        }
+    }
+}
