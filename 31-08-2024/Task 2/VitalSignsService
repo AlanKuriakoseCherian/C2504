@@ -1,0 +1,207 @@
+using System;
+using System.Data.SqlClient;
+using log4net;
+using SecondTask;
+
+namespace VitalSignsApp
+{
+    public class VitalSignsService
+    {
+        private static readonly string connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=VitalSignsDb;Integrated Security=True;";
+        private static readonly ILog log = LogManager.GetLogger(typeof(VitalSignsService));
+
+        // Create a new vital sign record in the database.
+        public static void Create(VitalSigns vitalSign)
+        {
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    string query = "INSERT INTO VitalSigns (PatientID,HeartRate, BloodPressure, Temperature) VALUES (@PatientID,@HeartRate, @BloodPressure, @Temperature)";
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@PatientID", vitalSign.PatientID);
+                        cmd.Parameters.AddWithValue("@HeartRate", vitalSign.HeartRate);
+                        cmd.Parameters.AddWithValue("@BloodPressure", vitalSign.BloodPressure);
+                        cmd.Parameters.AddWithValue("@Temperature", vitalSign.Temperature);
+
+                        conn.Open();
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                log.Error($"[0104] SQL Error: {ex.Message}", ex);
+                throw new ServerException($"[0104] SQL Error: {ex.Message}", ex);
+            }
+            catch (Exception ex)
+            {
+                log.Error($"[0105] General Error: {ex.Message}", ex);
+                throw new ServerException($"[0105] General Error: {ex.Message}", ex);
+            }
+        }
+
+
+
+        // Read vital signs from the database.
+        public static void Read(VitalSigns[] vitalSigns)
+        {
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    string query = "SELECT PatientID, HeartRate, BloodPressure, Temperature FROM VitalSigns";
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        conn.Open();
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            for (int i = 0; i < vitalSigns.Length; i++)
+                            {
+                                if (!reader.Read())
+                                {
+                                    throw new ServerException("[0101] Not enough data in the database.");
+                                }
+
+                                vitalSigns[i] = new VitalSigns
+                                {
+                                    PatientID = (int)reader["PatientID"],
+                                    HeartRate = (int)reader["HeartRate"],
+                                    BloodPressure = reader["BloodPressure"].ToString(),
+                                    Temperature = (double)reader["Temperature"]
+                                };
+                            }
+                        }
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                log.Error($"[0102] SQL Error: {ex.Message}", ex);
+                throw new ServerException($"[0102] SQL Error: {ex.Message}", ex);
+            }
+            catch (Exception ex)
+            {
+                log.Error($"[0103] General Error: {ex.Message}", ex);
+                throw new ServerException($"[0103] General Error: {ex.Message}", ex);
+            }
+        }
+
+        // Update an existing vital sign record.
+        public static void Update(VitalSigns vitalSign)
+        {
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    string query = "UPDATE VitalSigns SET HeartRate = @HeartRate, BloodPressure = @BloodPressure, Temperature = @Temperature WHERE PatientID = @PatientID";
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@PatientID", vitalSign.PatientID);
+                        cmd.Parameters.AddWithValue("@HeartRate", vitalSign.HeartRate);
+                        cmd.Parameters.AddWithValue("@BloodPressure", vitalSign.BloodPressure);
+                        cmd.Parameters.AddWithValue("@Temperature", vitalSign.Temperature);
+
+                        conn.Open();
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                log.Error($"[0106] SQL Error: {ex.Message}", ex);
+                throw new ServerException($"[0106] SQL Error: {ex.Message}", ex);
+            }
+            catch (Exception ex)
+            {
+                log.Error($"[0107] General Error: {ex.Message}", ex);
+                throw new ServerException($"[0107] General Error: {ex.Message}", ex);
+            }
+        }
+
+        // Delete a vital sign record by PatientID.
+        public static void Delete(int patientID)
+        {
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    string query = "DELETE FROM VitalSigns WHERE PatientID = @PatientID";
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@PatientID", patientID);
+
+                        conn.Open();
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                log.Error($"[0108] SQL Error: {ex.Message}", ex);
+                throw new ServerException($"[0108] SQL Error: {ex.Message}", ex);
+            }
+            catch (Exception ex)
+            {
+                log.Error($"[0109] General Error: {ex.Message}", ex);
+                throw new ServerException($"[0109] General Error: {ex.Message}", ex);
+            }
+        }
+
+        // Additional methods for sorting and finding specific records.
+        public static void SortBySystolicBloodPressure(VitalSigns[] vitalSigns)
+        {
+            Array.Sort(vitalSigns, (a, b) =>
+            {
+                int aSystolic = int.Parse(a.BloodPressure.Split('/')[0]);
+                int bSystolic = int.Parse(b.BloodPressure.Split('/')[0]);
+                return aSystolic.CompareTo(bSystolic);
+            });
+        }
+
+        public static int FindLowestHeartRateIndex(VitalSigns[] vitalSigns)
+        {
+            int lowestIndex = 0;
+            for (int i = 1; i < vitalSigns.Length; i++)
+            {
+                if (vitalSigns[i].HeartRate < vitalSigns[lowestIndex].HeartRate)
+                {
+                    lowestIndex = i;
+                }
+            }
+            return lowestIndex;
+        }
+
+        public static int FindSecondHighestTemperatureIndex(VitalSigns[] vitalSigns)
+        {
+            if (vitalSigns.Length < 2)
+            {
+                throw new InvalidOperationException("Need at least two patients to find the second highest temperature.");
+            }
+
+            int highestIndex = 0;
+            int secondHighestIndex = -1;
+
+            for (int i = 1; i < vitalSigns.Length; i++)
+            {
+                if (vitalSigns[i].Temperature > vitalSigns[highestIndex].Temperature)
+                {
+                    secondHighestIndex = highestIndex;
+                    highestIndex = i;
+                }
+                else if (vitalSigns[i].Temperature > (secondHighestIndex == -1 ? double.MinValue : vitalSigns[secondHighestIndex].Temperature))
+                {
+                    secondHighestIndex = i;
+                }
+            }
+
+            if (secondHighestIndex == -1)
+            {
+                throw new InvalidOperationException("Unable to find the second highest temperature.");
+            }
+
+            return secondHighestIndex;
+        }
+    }
+}
