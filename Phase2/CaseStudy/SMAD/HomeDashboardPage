@@ -1,0 +1,105 @@
+ <Grid>
+
+     <Grid.ColumnDefinitions>
+         <ColumnDefinition Width="*"/>
+         <ColumnDefinition Width="*"/>
+     </Grid.ColumnDefinitions>
+     <Grid.RowDefinitions>
+         <RowDefinition Height="*"/>
+         <RowDefinition Height="*"/>
+         <RowDefinition Height="*"/>
+     </Grid.RowDefinitions>
+     <TextBlock Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Text="Home Dashboard" FontSize="36" FontWeight="Bold" Margin="268,0,0,145" HorizontalAlignment="Left" Width="314"/>
+
+
+
+     <!-- KPIs Section -->
+     <Grid Grid.Column="0" Grid.Row="0" Margin="10,10,25,10">
+         <Grid.ColumnDefinitions>
+             <ColumnDefinition Width="135*"/>
+             <ColumnDefinition Width="118*"/>
+             <ColumnDefinition Width="127*"/>
+         </Grid.ColumnDefinitions>
+         <Grid.RowDefinitions>
+             <RowDefinition Height="*"/>
+         </Grid.RowDefinitions>
+
+         <TextBlock Grid.Column="0" Grid.Row="0" Text="Production Efficiency" FontSize="18" FontWeight="Bold" Grid.ColumnSpan="2" Margin="0,50,42,-50"/>
+         <TextBlock Grid.Column="1" Grid.Row="0" Text="Downtime" FontSize="18" FontWeight="Bold" Margin="57,50,77,-50" Grid.ColumnSpan="2"/>
+         <TextBlock Grid.Column="2" Grid.Row="0" Text="Output Rates" FontSize="18" FontWeight="Bold" Margin="76,50,-76,-50"/>
+
+         <TextBlock Grid.Column="0" Text="85%" FontSize="24" FontWeight="Bold" Margin="0,102,26,-10"/>
+         <TextBlock Text="5%" FontSize="24" FontWeight="Bold" Margin="69,102,77,-11" Grid.ColumnSpan="2" Grid.Column="1"/>
+         <TextBlock Grid.Column="2" Text="95%" FontSize="24" FontWeight="Bold" Margin="76,102,-38,-26"/>
+     </Grid>
+
+     <!-- Real-time Updates Section -->
+     <Grid Grid.Column="1" Grid.Row="0" Margin="45,65,24,21">
+         <Grid.ColumnDefinitions>
+             <ColumnDefinition Width="*"/>
+         </Grid.ColumnDefinitions>
+         <Grid.RowDefinitions>
+             <RowDefinition Height="*"/>
+         </Grid.RowDefinitions>
+
+         <TextBlock Grid.Column="0" Grid.Row="0" Text="Real-time Updates" FontSize="18" FontWeight="Bold" Margin="20,0,0,0"/>
+         <ListBox Grid.Column="0" Margin="20,33,44,96" ItemsSource="{Binding RealTimeUpdates}">
+             <ListBox.ItemTemplate>
+                 <DataTemplate>
+                     <TextBlock Text="{Binding Update}"/>
+                 </DataTemplate>
+             </ListBox.ItemTemplate>
+         </ListBox>
+     </Grid>
+
+     <!-- Recent Alerts Section -->
+     <Grid Grid.Column="0" Grid.Row="1" Margin="10">
+         <Grid.ColumnDefinitions>
+             <ColumnDefinition Width="*"/>
+         </Grid.ColumnDefinitions>
+         <Grid.RowDefinitions>
+             <RowDefinition Height="*"/>
+         </Grid.RowDefinitions>
+
+         <TextBlock Grid.Column="0" Grid.Row="0" Text="Recent Alerts" FontSize="18" FontWeight="Bold"/>
+         <ListBox Grid.Column="0" Margin="0,41,10,0" ItemsSource="{Binding RecentAlerts}">
+             <ListBox.ItemTemplate>
+                 <DataTemplate>
+                     <TextBlock Text="{Binding Alert}"/>
+                 </DataTemplate>
+             </ListBox.ItemTemplate>
+         </ListBox>
+     </Grid>
+
+     <!-- Manufacturing Processes Section -->
+     <Grid Grid.Column="1" Grid.Row="1" Margin="10">
+         <Grid.ColumnDefinitions>
+             <ColumnDefinition Width="*"/>
+         </Grid.ColumnDefinitions>
+         <Grid.RowDefinitions>
+             <RowDefinition Height="*"/>
+         </Grid.RowDefinitions>
+
+         <TextBlock Grid.Column="0" Grid.Row="0" Text="Manufacturing Processes" FontSize="18" FontWeight="Bold"/>
+         <ListBox Grid.Column="0" Margin="0,39,10,0" ItemsSource="{Binding ManufacturingProcesses}">
+             <ListBox.ItemTemplate>
+                 <DataTemplate>
+                     <TextBlock Text="{Binding Process}"/>
+                 </DataTemplate>
+             </ListBox.ItemTemplate>
+         </ListBox>
+     </Grid>
+
+     <!-- Status Section -->
+     <Grid Grid.Column="0" Grid.Row="2" Margin="10">
+         <Grid.ColumnDefinitions>
+             <ColumnDefinition Width="*"/>
+         </Grid.ColumnDefinitions>
+         <Grid.RowDefinitions>
+             <RowDefinition Height="*"/>
+         </Grid.RowDefinitions>
+
+         <TextBlock Grid.Column="0" Grid.Row="0" Text="Status" FontSize="18" FontWeight="Bold" Margin="0,-8,0,-7"/>
+         <TextBlock Grid.Column="0" Text="Running" FontSize="24" FontWeight="Bold" Margin="0,32,0,98"/>
+     </Grid>
+ </Grid>
