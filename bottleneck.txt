@@ -1,0 +1,358 @@
+xaml
+------------
+<Window x:Class="SMAD.Pages.BottleNeckAnalysisWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:oxy="http://oxyplot.org/wpf"
+        xmlns:local="clr-namespace:SMAD.Pages"
+        mc:Ignorable="d"
+        WindowState="Maximized"
+        ResizeMode="CanResize"
+        Title="Bottleneck Analysis Page">
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,10" Grid.Row="0">
+            <TextBlock Text="Select Production Line:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+            <ComboBox Width="150" 
+                      ItemsSource="{Binding ProductionLines}" 
+                      SelectedItem="{Binding SelectedProductionLine}" 
+                      DisplayMemberPath="LineName" 
+                      Margin="0,0,20,0"/>
+
+            <TextBlock Text="Start Date:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+            <DatePicker SelectedDate="{Binding StartDate}" Margin="0,0,20,0"/>
+
+            <TextBlock Text="End Date:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+            <DatePicker SelectedDate="{Binding EndDate}" Margin="0,0,20,0"/>
+
+            <Button Content="Analyze" 
+                    Width="100" 
+                    Command="{Binding AnalyzeCommand}"/>
+        </StackPanel>
+
+        <TabControl Grid.Row="1">
+            <TabItem Header="Bottleneck Analysis">
+                <DataGrid Name="BottleneckAnalysisDataGrid" 
+                          AutoGenerateColumns="False" 
+                          IsReadOnly="True" 
+                          ItemsSource="{Binding BottleneckData}" 
+                          Margin="0,0,0,10">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Line" Binding="{Binding LineName}" Width="120"/>
+                        <DataGridTextColumn Header="Bottleneck Time" Binding="{Binding BottleneckTime}" Width="120"/>
+                        <DataGridTextColumn Header="Total Downtime" Binding="{Binding TotalDowntime}" Width="120"/>
+                        <DataGridTextColumn Header="Recommendations" Binding="{Binding Recommendations}" Width="300"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+            <TabItem Header="Bottleneck Chart">
+                <oxy:PlotView Model="{Binding PlotModel}" Margin="0,10,0,30" Visibility="Visible"/>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>
+
+------------------------------------------------------
+Bottleneck.xaml.cs
+-----------------
+sing System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
+using SMAD.ViewModels;
+
+namespace SMAD.Pages
+{
+    /// <summary>
+    /// Interaction logic for BottleNeckAnalysisWindow.xaml
+    /// </summary>
+    public partial class BottleNeckAnalysisWindow : Window
+    {
+        public BottleNeckAnalysisWindow()
+        {
+            InitializeComponent();
+            DataContext = new BottleneckAnalysisViewModel();
+
+        }
+    }
+}
+------------------------------------
+viewmodw
+---------
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using OxyPlot.Axes;
+using OxyPlot.Series;
+using OxyPlot;
+using System.Windows.Input;
+using System.Windows;
+using SMAD.Entities;
+
+namespace SMAD.ViewModels
+{
+    public class BottleneckAnalysisViewModel : ViewModelBase1
+    {
+        private ObservableCollection<ProductionLine> _productionLines;
+        private ProductionLine _selectedProductionLine;
+        private DateTime? _startDate;
+        private DateTime? _endDate;
+        private ObservableCollection<BottleneckData> _bottleneckData;
+        private PlotModel _plotModel;
+
+        public ObservableCollection<ProductionLine> ProductionLines
+        {
+            get => _productionLines;
+            set
+            {
+                _productionLines = value;
+                OnPropertyChanged(nameof(ProductionLines));
+            }
+        }
+
+        public ProductionLine SelectedProductionLine
+        {
+            get => _selectedProductionLine;
+            set
+            {
+                _selectedProductionLine = value;
+                OnPropertyChanged(nameof(SelectedProductionLine));
+            }
+        }
+
+        public DateTime? StartDate
+        {
+            get => _startDate;
+            set
+            {
+                _startDate = value;
+                OnPropertyChanged(nameof(StartDate));
+            }
+        }
+
+        public DateTime? EndDate
+        {
+            get => _endDate;
+            set
+            {
+                _endDate = value;
+                OnPropertyChanged(nameof(EndDate));
+            }
+        }
+
+        public ObservableCollection<BottleneckData> BottleneckData
+        {
+            get => _bottleneckData;
+            set
+            {
+                _bottleneckData = value;
+                OnPropertyChanged(nameof(BottleneckData));
+            }
+        }
+
+        public PlotModel PlotModel
+        {
+            get => _plotModel;
+            set
+            {
+                _plotModel = value;
+                OnPropertyChanged(nameof(PlotModel));
+            }
+        }
+
+        public ICommand AnalyzeCommand { get; }
+
+        public BottleneckAnalysisViewModel()
+        {
+            // Initialize collections
+            ProductionLines = new ObservableCollection<ProductionLine>();
+            BottleneckData = new ObservableCollection<BottleneckData>();
+
+            // Load production lines
+            LoadProductionLines();
+
+            // Setup command
+            AnalyzeCommand = new RelayCommand1(param => AnalyzeBottlenecks());
+        }
+
+        private void LoadProductionLines()
+        {
+            using (var context = new SmadDbEntities())
+            {
+                var lines = context.ProductionLines.ToList();
+                ProductionLines = new ObservableCollection<ProductionLine>(lines);
+            }
+        }
+
+        private void AnalyzeBottlenecks()
+        {
+            // Check if a line is selected
+            if (SelectedProductionLine == null)
+            {
+                MessageBox.Show("Please select a production line.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            // Check if start and end dates are selected
+            if (StartDate == null || EndDate == null)
+            {
+                MessageBox.Show("Please select both start and end dates.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            using (var context = new SmadDbEntities())
+            {
+                try
+                {
+                    var data = context.ProductionMetrics
+                        .Where(pm => pm.LineID == SelectedProductionLine.LineID
+                                     && pm.MetricDate >= StartDate
+                                     && pm.MetricDate <= EndDate)
+                        .ToList();
+
+                    MessageBox.Show($"Data count: {data.Count}");
+
+                    if (data.Count == 0)
+                    {
+                        MessageBox.Show("No data found for the selected line and date range.");
+                        return;
+                    }
+
+                    // Calculate total downtime in ticks
+                    var totalDowntimeTicks = data.Sum(pm => (long)((pm.Downtime ?? 0) * TimeSpan.TicksPerHour));
+                    var totalDowntime = new TimeSpan(totalDowntimeTicks);
+
+                    // Generate recommendations based on analysis
+                    string recommendations = GenerateRecommendations(totalDowntime);
+
+                    // Create and populate BottleneckData collection
+                    BottleneckData.Clear();
+                    BottleneckData.Add(new BottleneckData
+                    {
+                        LineName = SelectedProductionLine.LineName,
+                        BottleneckTime = totalDowntime,
+                        TotalDowntime = totalDowntime,
+                        Recommendations = recommendations
+                    });
+
+                    // Update the PlotModel
+                    UpdatePlotModel(data);
+                }
+                catch (Exception ex)
+                {
+                    // Handle exceptions (e.g., log them)
+                    MessageBox.Show($"Error during analysis: {ex.Message}");
+                }
+            }
+        }
+
+        private string GenerateRecommendations(TimeSpan totalDowntime)
+        {
+            // Implement your recommendation logic here
+            return $"Recommendations based on total downtime of {totalDowntime.TotalHours} hours."; // Placeholder
+        }
+
+        private void UpdatePlotModel(List<ProductionMetric> data)
+        {
+            var plotModel = new PlotModel
+            { Title = "Downtime Analysis" };
+
+            plotModel.Series.Clear();
+
+            // Create BarSeries based on data
+            var barSeries = new BarSeries
+            {
+                Title = "Downtime Analysis",
+                ItemsSource = data.Select(pm => new BarItem((double)(pm.Downtime ?? 0))).ToList()
+            };
+
+            plotModel.Series.Add(barSeries);
+
+            // Add axes
+            var categoryAxis = new CategoryAxis { Position = AxisPosition.Left };
+            foreach (var pm in data)
+            {
+                categoryAxis.Labels.Add(pm.MetricDate.ToString("MM/dd/yyyy")); // Adjust the date format as needed
+            }
+
+            plotModel.Axes.Clear();
+            plotModel.Axes.Add(categoryAxis);
+            plotModel.Axes.Add(new LinearAxis { Position = AxisPosition.Bottom, Title = "Downtime (Hours)" });
+
+
+            PlotModel = plotModel;
+        }
+
+        
+       
+    }
+}
+---------------------------------------------------------
+EFrepo
+--------
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using SMAD.Entities;
+using SMAD.Repo;
+
+namespace SMAD.EFRepo
+{
+    public class EfBottleneckRepo : IBottleneckRepo
+    {
+        public List<ProductionMetric> GetProductionMetrics(ProductionLine selectedProductionLine, DateTime? startDate, DateTime? endDate)
+        {
+            using (var context = new SmadDbEntities())
+            {
+                var query = context.ProductionMetrics.AsQueryable();
+
+                if (selectedProductionLine != null)
+                {
+                    query = query.Where(m => m.LineID == selectedProductionLine.LineID);
+                }
+
+                if (startDate.HasValue)
+                {
+                    query = query.Where(m => m.MetricDate >= startDate.Value);
+                }
+
+                if (endDate.HasValue)
+                {
+                    query = query.Where(m => m.MetricDate <= endDate.Value);
+                }
+
+                return query.ToList();
+            }
+        }
+    }
+}
+-------------------------------------------
+IBottleNeck
+-------------
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using SMAD.Entities;
+
+namespace SMAD.Repo
+{
+    public interface IBottleneckRepo
+    {
+        List<ProductionMetric> GetProductionMetrics(ProductionLine selectedProductionLine, DateTime? startDate, DateTime? endDate);
+    }
+}
